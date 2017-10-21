@@ -5,7 +5,6 @@
 var dlg = new Window("dialog", "Remove layers with names...");
 	var options = dlg.add("group");
 		options.orientation = "row";
-		options.alignChildren = "left";
 		var rbBegins = options.add("radiobutton", undefined, "Beginning with");
 		rbBegins.value = true;
 		var rbContains = options.add("radiobutton", undefined, "Containing");
@@ -20,7 +19,14 @@ dlg.show();
 
 var inputFolder = Folder.selectDialog("Select the folder containing your images");
 var outputFolder = Folder.selectDialog("Select or create a folder for your new images");
-var regExp = new RegExp();
+
+// sets up a regular expression based on users selection of first dialog box
+if (rbBegins.value == true)
+	var regExp = new RegExp('^' + textInput.text, 'i');
+if (rbContains.value == true)
+	var regExp = new RegExp(textInput.text, 'i');
+if (rbEnds.value == true)
+	var regExp = new RegExp(textInput.text + '$', 'i');
 
 while (inputFolder.toString() == outputFolder.toString()) {
 	alert("The folder you select cannot be the same as the input folder. Choose a different folder.");
@@ -33,18 +39,9 @@ var fileList = inputFolder.getFiles("*.psd");
 if (fileList.length == 0)
 	alert("There are no PSD files in this folder");
 else {
-
-	/* opens each psd file from the input folder and sets up regular expressions depending
-	   on user input of the first dialog box */
+	// opens each psd file from the input folder
 	for (var i = 0; i < fileList.length; i++) {
 		var doc = open(fileList[i]);
-		if (rbBegins.value == true) {
-			regExp = new RegExp('^' + textInput.text, 'i');
-		} else if (rbContains.value == true) {
-			regExp = new RegExp(textInput.text, 'i');
-		} else {
-			regExp = new RegExp(textInput.text + '$', 'i');
-		}
 
 		/* iterates through each layer of the active document and deletes layers with
 		   names that match the regex pattern */
@@ -53,5 +50,8 @@ else {
 				doc.layers[j].remove();
 			}
 		}
+
+		// saves the file in the output folder
+		doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions())
 	}
 }
