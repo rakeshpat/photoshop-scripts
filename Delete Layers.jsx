@@ -37,7 +37,10 @@ function optionsDialog() {
 						if (rbEnds.value == true)
 							regExp = new RegExp(textInput.text + '$', 'i');
 
-						main();
+						if (confirm("Only save files that have been changed to the output folder?"))
+							main(true);
+						else
+							main(false);
 					}
 				}
 
@@ -49,7 +52,7 @@ function optionsDialog() {
 	dlg.show();
 }
 
-function main() {
+function main(saveChanges) {
 	var inputFolder = Folder.selectDialog("Select the folder containing your images");
 	if (inputFolder == null)
 		return;
@@ -75,16 +78,20 @@ function main() {
 		for (var i = 0; i < fileList.length; i++) {
 			var doc = open(fileList[i]);
 
-			/* iterates through each layer of the active document and deletes layers with
-			   names that match the regex pattern */
+			// iterates through each layer of the active document and deletes layers with names that match the regex pattern
 			for (var j = 0; j < doc.layers.length; j++) {
 				if (regExp.test(doc.layers[j].name)) {
 					doc.layers[j].remove();
 				}
 			}
 
-			// saves the file in the output folder
-			doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions())
+			// save the file
+			if (saveChanges == true) {
+				if (doc.saved == false)
+					doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions())
+			}
+			else
+				doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions())
 		}
 	}
 }
