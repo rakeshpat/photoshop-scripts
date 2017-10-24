@@ -1,12 +1,36 @@
 #target photoshop
 
+var outputFolder = null;
+var fileList = null;
 var regExp = new RegExp();
-var textInput = "";
 
-optionsDialog();
+main();
 
-// dialog box to allow users to select a search option and input a word for use with regex
-function optionsDialog() {
+function main() {
+	var inputFolder = Folder.selectDialog("Select the folder containing your images");
+	if (inputFolder == null)
+		return;
+
+	// set the file list to look only at psd files
+	fileList = inputFolder.getFiles("*.psd");
+
+	if (fileList.length == 0) {
+		alert("There are no PSD files in this folder");
+		return;
+	}
+
+	outputFolder = Folder.selectDialog("Select or create a folder for your new images");
+	if (outputFolder == null)
+		return;
+
+	while (inputFolder.toString() == outputFolder.toString()) {
+		alert("The folder you select cannot be the same as the input folder. Choose a different folder.");
+		outputFolder = Folder.selectDialog("Select or create a folder for your new images");
+		if (outputFolder == null)
+			return;
+	}
+
+	// dialog box to allow users to select a search option and input a word for use with regex
 	var dlg = new Window("dialog", "Remove layers with names...");
 
 		var options = dlg.add("group");
@@ -16,7 +40,7 @@ function optionsDialog() {
 			var rbEnds = options.add("radiobutton", undefined, "Ending with");
 			rbContains.value = true;
 
-		textInput = dlg.add("edittext", undefined, "");
+		var textInput = dlg.add("edittext", undefined, "");
 			textInput.characters = 20;
 			textInput.active = true;
 
@@ -37,10 +61,10 @@ function optionsDialog() {
 						if (rbEnds.value == true)
 							regExp = new RegExp(textInput.text + '$', 'i');
 
-						if (confirm("Only save files that have been changed to the output folder?"))
-							main(true);
+						if (confirm("Only save the files that have been modified to the output folder?"))
+							openAndSave(true);
 						else
-							main(false);
+							openAndSave(false);
 					}
 				}
 
@@ -52,46 +76,24 @@ function optionsDialog() {
 	dlg.show();
 }
 
-function main(saveChanges) {
-	var inputFolder = Folder.selectDialog("Select the folder containing your images");
-	if (inputFolder == null)
-		return;
+function openAndSave(saveChanges) {
+	// opens each psd file from the input folder
+	for (var i = 0; i < fileList.length; i++) {
+		var doc = open(fileList[i]);
 
-	var outputFolder = Folder.selectDialog("Select or create a folder for your new images");
-	if (outputFolder == null)
-		return;
-
-	while (inputFolder.toString() == outputFolder.toString()) {
-		alert("The folder you select cannot be the same as the input folder. Choose a different folder.");
-		var outputFolder = Folder.selectDialog("Select or create a folder for your new images");
-		if (outputFolder == null)
-			return;
-	}
-
-	// set the file list to look only at psd files
-	var fileList = inputFolder.getFiles("*.psd");
-
-	if (fileList.length == 0)
-		alert("There are no PSD files in this folder");
-	else {
-		// opens each psd file from the input folder
-		for (var i = 0; i < fileList.length; i++) {
-			var doc = open(fileList[i]);
-
-			// iterates through each layer of the active document and deletes layers with names that match the regex pattern
-			for (var j = 0; j < doc.layers.length; j++) {
-				if (regExp.test(doc.layers[j].name)) {
-					doc.layers[j].remove();
-				}
+		// iterates through each layer of the active document and deletes layers with names that match the regex pattern
+		for (var j = 0; j < doc.layers.length; j++) {
+			if (regExp.test(doc.layers[j].name)) {
+				doc.layers[j].remove();
 			}
+		}
 
-			// save the file
-			if (saveChanges == true) {
-				if (doc.saved == false)
-					doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions())
-			}
-			else
+		// save the file
+		if (saveChanges == true) {
+			if (doc.saved == false)
 				doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions())
 		}
+		else
+			doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions())
 	}
 }
