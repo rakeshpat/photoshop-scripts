@@ -1,5 +1,9 @@
 #target photoshop
 
+/* This script removes layers beginning with, containing or ending with a series of letters and/or numbers the user 
+   inputs, from PSD files in a directory. An output folder selected by the user is presented and will contain all files 
+   that have been processed unless the option to save changes only to modified files is selected. */
+
 var outputFolder = null;
 var fileList = null;
 var regExp = new RegExp();
@@ -81,7 +85,7 @@ function openAndSave(saveChanges) {
 	for (var i = 0; i < fileList.length; i++) {
 		var doc = open(fileList[i]);
 
-		// iterates through each layer of the active document and deletes layers with names that match the regex pattern
+		// iterates through each layer of the document and deletes layers with names that match the regex pattern
 		for (var j = 0; j < doc.layers.length; j++) {
 			if (regExp.test(doc.layers[j].name)) {
 				doc.layers[j].remove();
@@ -89,8 +93,8 @@ function openAndSave(saveChanges) {
 		}
 
 		// save the file
-		if (saveChanges == true) {
-			if (doc.saved == false)
+		if (saveChanges) {
+			if (!doc.saved)
 				doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions())
 		}
 		else
