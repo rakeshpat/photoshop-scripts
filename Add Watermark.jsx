@@ -12,6 +12,24 @@ while (inputFolder.toString() == outputFolder.toString()) {
 
 var wm = open(watermark);
 
-for (i = 0; i < fileList.length; i++) {
+for (var i = 0; i < fileList.length; i++) {
 	var doc = open(fileList[i]);
+
+	if (doc != wm) {
+		var wmLayer = doc.artLayers.add();
+		wmLayer.name = "watermark";
+
+		app.activeDocument = wm;
+
+		for (var j = 1; j < wm.layers.length; j++) {
+			if (!wm.layers[j].visible)
+				wm.layers[j].remove();
+		}
+
+		wm.layers[1].copy(true);
+		app.activeDocument = doc;
+		doc.paste();
+		wmLayer.move(activeDocument, ElementPlacement.PLACEATBEGINNING);
+	}
+
 }
