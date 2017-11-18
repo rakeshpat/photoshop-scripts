@@ -10,6 +10,30 @@ while (inputFolder.toString() == outputFolder.toString()) {
 	var outputFolder = Folder.selectDialog("Select or create a folder for your new images");
 }
 
+var dlg = new Window("dialog", "Options");
+	var hAlignPnl = dlg.add("panel", undefined, "Horizontal alignment");
+		hAlignPnl.orientation = "row";
+		var rbLeft = hAlignPnl.add("radiobutton", undefined, "Left");
+		var rbCentre = hAlignPnl.add("radiobutton", undefined, "Centre");
+		var rbRight = hAlignPnl.add("radiobutton", undefined, "Right");
+
+	var vAlignPnl = dlg.add("panel", undefined, "Vertical alignment");
+		vAlignPnl.orientation = "row";
+		var rbTop = vAlignPnl.add("radiobutton", undefined, "Top");
+		var rbMiddle = vAlignPnl.add("radiobutton", undefined, "Middle");
+		var rbBottom = vAlignPnl.add("radiobutton", undefined, "Bottom");
+
+	var opacityGrp = dlg.add("group");
+		opacityGrp.orientation = "row";
+		opacityGrp.add("statictext", undefined, "Opacity:");
+		var ibOpacity = opacityGrp.add("edittext", undefined, 10.0);
+		opacityGrp.add("statictext", undefined, "%");
+
+	var buttons = dlg.add("group");
+		var btnOK = buttons.add("button", undefined, "OK");
+		var btnCancel = buttons.add("button", undefined, "Cancel");
+dlg.show();
+
 var wm = open(watermark);
 
 for (var i = 0; i < fileList.length; i++) {
@@ -30,6 +54,9 @@ for (var i = 0; i < fileList.length; i++) {
 		app.activeDocument = doc;
 		doc.paste();
 		wmLayer.move(activeDocument, ElementPlacement.PLACEATBEGINNING);
+		doc.artLayers.getByName("watermark").opacity = 10;
 	}
 
 }
+
+wm.close(SaveOptions.DONOTSAVECHANGES);
