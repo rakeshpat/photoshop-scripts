@@ -16,17 +16,30 @@ var dlg = new Window("dialog", "Options");
 		var rbLeft = hAlignPnl.add("radiobutton", undefined, "Left");
 		var rbCentre = hAlignPnl.add("radiobutton", undefined, "Centre");
 		var rbRight = hAlignPnl.add("radiobutton", undefined, "Right");
+		rbRight.value = true;
 
 	var vAlignPnl = dlg.add("panel", undefined, "Vertical alignment");
 		vAlignPnl.orientation = "row";
 		var rbTop = vAlignPnl.add("radiobutton", undefined, "Top");
 		var rbMiddle = vAlignPnl.add("radiobutton", undefined, "Middle");
 		var rbBottom = vAlignPnl.add("radiobutton", undefined, "Bottom");
+		rbBottom.value = true;
+
+	var offsetPnl = dlg.add("panel", undefined, "Offset watermark");
+		offsetPnl.orientation = "row";
+		var sOffset = offsetPnl.add("slider", undefined, 10, 0, 100);
+		var ibOffset = offsetPnl.add("edittext", undefined, 10);
+		sOffset.onChanging = function() {
+			ibOffset.text = sOffset.value;
+		}
+		ibOffset.onChanging = function() {
+			sOffset.value = Number(ibOffset.text);
+		}
 
 	var opacityGrp = dlg.add("group");
 		opacityGrp.orientation = "row";
 		opacityGrp.add("statictext", undefined, "Opacity:");
-		var ibOpacity = opacityGrp.add("edittext", undefined, 10.0);
+		var ibOpacity = opacityGrp.add("edittext", undefined, 10);
 		opacityGrp.add("statictext", undefined, "%");
 
 	var buttons = dlg.add("group");
@@ -56,7 +69,6 @@ for (var i = 0; i < fileList.length; i++) {
 		wmLayer.move(activeDocument, ElementPlacement.PLACEATBEGINNING);
 		doc.artLayers.getByName("watermark").opacity = 10;
 	}
-
 }
 
 wm.close(SaveOptions.DONOTSAVECHANGES);
