@@ -95,22 +95,24 @@ function main() {
 			wmLayer.move(activeDocument, ElementPlacement.PLACEATBEGINNING);
 
 			doc.artLayers.getByName("watermark").opacity = sOpacity.value;
+			
+			var x, y;
+			
+			if (rbLeft.value)
+				x = 0;
+			if (rbCentre.value)
+				x = (doc.width / 2) - (wm.width / 2);
+			if (rbRight.value)
+				x = doc.width - doc.width;;
+			if (rbTop.value)
+				y = 0;
+			if (rbMiddle.value)
+				y = (doc.height / 2) - (wm.width / 2);
+			if (rbBottom.value)
+				y = doc.height - doc.height;
 
-			if (!rbCentre.value && !rbMiddle.value) {
-				var x;
-				var y;
-
-				if (rbLeft.value)
-					x = 0;
-				if (rbRight.value)
-					x = doc.width;
-				if (rbTop.value)
-					y = 0;
-				if (rbBottom.value)
-					y = doc.height;
-
-				moveLayer(doc.artLayers.getByName("watermark"), x, y);
-			}
+			moveLayer(doc.artLayers.getByName("watermark"), x, y);
+			
 		}
 	}
 	wm.close(SaveOptions.DONOTSAVECHANGES);
