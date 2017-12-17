@@ -46,7 +46,7 @@ function main() {
 
 		var offsetPnl = dlg.add("panel", undefined, "Offset watermark");
 			offsetPnl.orientation = "row";
-			var sOffset = offsetPnl.add("slider", undefined, 10, 0, 100);
+			var sOffset = offsetPnl.add("slider", undefined, 5, 0, 100);
 			var ibOffset = offsetPnl.add("edittext", undefined, 10);
 			offsetPnl.add("statictext", undefined, "%");
 			sOffset.onChanging = function() {
@@ -99,17 +99,17 @@ function main() {
 			var x, y, minusX, minusY;
 			
 			if (rbLeft.value)
-				x = 0;
+				x = doc.width - wm.width;
 			if (rbCentre.value)
 				x = (doc.width / 2) - (wm.width / 2);
 			if (rbRight.value)
-				x = doc.width - doc.width;
+				x = 0;
 			if (rbTop.value)
-				y = 0;
+				y = doc.height - wm.height;
 			if (rbMiddle.value)
 				y = (doc.height / 2) - (wm.height / 2);
 			if (rbBottom.value)
-				y = doc.height - doc.height;
+				y = 0;
 
 			minusX = 0;
 			minusY = 0;
@@ -119,8 +119,15 @@ function main() {
 			if (!rbMiddle.value)
 				minusY = (sOffset.value / 100) * doc.height;
 
-			x = x + minusX;
-			y = y + minusY;
+			if (rbLeft.value)
+				x = x - minusX;
+			else
+				x = x + minusX;
+
+			if (rbTop.value)
+				y = y - minusY;
+			else
+				y = y + minusY;
 
 			moveLayer(doc.artLayers.getByName("watermark"), x, y);
 			
