@@ -96,20 +96,31 @@ function main() {
 
 			doc.artLayers.getByName("watermark").opacity = sOpacity.value;
 			
-			var x, y;
+			var x, y, minusX, minusY;
 			
 			if (rbLeft.value)
 				x = 0;
 			if (rbCentre.value)
 				x = (doc.width / 2) - (wm.width / 2);
 			if (rbRight.value)
-				x = doc.width - doc.width;;
+				x = doc.width - doc.width;
 			if (rbTop.value)
 				y = 0;
 			if (rbMiddle.value)
-				y = (doc.height / 2) - (wm.width / 2);
+				y = (doc.height / 2) - (wm.height / 2);
 			if (rbBottom.value)
 				y = doc.height - doc.height;
+
+			minusX = 0;
+			minusY = 0;
+
+			if (!rbCentre.value)
+				minusX = (sOffset.value / 100) * doc.width;
+			if (!rbMiddle.value)
+				minusY = (sOffset.value / 100) * doc.height;
+
+			x = x + minusX;
+			y = y + minusY;
 
 			moveLayer(doc.artLayers.getByName("watermark"), x, y);
 			
