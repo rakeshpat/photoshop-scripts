@@ -130,7 +130,7 @@ function main() {
 				y = y + minusY;
 
 			moveLayer(doc.artLayers.getByName("watermark"), x, y);
-			
+			doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions());
 		}
 	}
 	wm.close(SaveOptions.DONOTSAVECHANGES);
