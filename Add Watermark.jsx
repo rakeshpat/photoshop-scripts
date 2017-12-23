@@ -3,18 +3,23 @@
 main();
 
 function main() {
+	// open dialog for the watermark file
 	var watermark = File.openDialog("Select a file");
 	if (watermark == null)
 		return;
 
+	// select dialog for setting an input folder where files to be watermarked are kept
 	var inputFolder = Folder.selectDialog("Select the folder containing your images");
 	if (inputFolder == null)
 		return;
 
+	// select dialog for setting an output folder to store the watermarked images
 	var outputFolder = Folder.selectDialog("Select or create a folder for your new images");
 	if (outputFolder == null)
 		return;
 
+	// check to see if the input folder and output folder are matching, and if so, a differernt output folder
+	// will need to be selected
 	while (inputFolder.toString() == outputFolder.toString()) {
 		alert("The folder you select cannot be the same as the input folder. Choose a different folder.");
 		outputFolder = Folder.selectDialog("Select or create a folder for your new images");
@@ -22,13 +27,10 @@ function main() {
 			return;
 	}
 
+	// puts the filenames of all psd files into the fileList array
 	var fileList = inputFolder.getFiles("*.psd");
 
-	while (inputFolder.toString() == outputFolder.toString()) {
-		alert("The folder you select cannot be the same as the input folder. Choose a different folder.");
-		var outputFolder = Folder.selectDialog("Select or create a folder for your new images");
-	}
-
+	// dialog box with options for placement of watermark
 	var dlg = new Window("dialog", "Options");
 		var hAlignPnl = dlg.add("panel", undefined, "Horizontal alignment");
 			hAlignPnl.orientation = "row";
@@ -73,8 +75,10 @@ function main() {
 			var btnCancel = buttons.add("button", undefined, "Cancel");
 	dlg.show();
 
+	// open the watermark file
 	var wm = open(watermark);
 
+	// iterate through all files from the fileList array and add watermark to them
 	for (var i = 0; i < fileList.length; i++) {
 		var doc = open(fileList[i]);
 
@@ -133,9 +137,12 @@ function main() {
 			doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions());
 		}
 	}
+
+	// closes the watermark file without saving changes
 	wm.close(SaveOptions.DONOTSAVECHANGES);
 }
 
+// function to place a layer a specific location
 function moveLayer(layerRef, x, y) {
 	var position = layerRef.bounds;
 	
