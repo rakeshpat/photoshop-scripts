@@ -1,25 +1,28 @@
 #target photoshop
 
+/* This script allows a user to watermark all psd files within a directory. The user is presented with dialog boxes to
+   choose a watermark image, choose an input directory containing psd files and an output directory which will contain
+   psd files with watermarks. Before the watermark is applied to the images, the user is presented with options to 
+   decide where the watermark is to be placed by horizontal and vertical alignment and also offsetting from the edge 
+   of the canvas, and also how opaque the watermark should be.
+*/
+
 main();
 
 function main() {
-	// open dialog for the watermark file
 	var watermark = File.openDialog("Select a file");
 	if (watermark == null)
 		return;
 
-	// select dialog for setting an input folder where files to be watermarked are kept
 	var inputFolder = Folder.selectDialog("Select the folder containing your images");
 	if (inputFolder == null)
 		return;
 
-	// select dialog for setting an output folder to store the watermarked images
 	var outputFolder = Folder.selectDialog("Select or create a folder for your new images");
 	if (outputFolder == null)
 		return;
 
-	// check to see if the input folder and output folder are matching, and if so, a differernt output folder
-	// will need to be selected
+	// check to see if input and output folders are matching, and if so, a different output folder can be selected
 	while (inputFolder.toString() == outputFolder.toString()) {
 		alert("The folder you select cannot be the same as the input folder. Choose a different folder.");
 		outputFolder = Folder.selectDialog("Select or create a folder for your new images");
@@ -30,8 +33,9 @@ function main() {
 	// puts the filenames of all psd files into the fileList array
 	var fileList = inputFolder.getFiles("*.psd");
 
-	// dialog box with options for placement of watermark
 	var dlg = new Window("dialog", "Options");
+
+		// panel containing options to select horizontal alignment of watermark
 		var hAlignPnl = dlg.add("panel", undefined, "Horizontal alignment");
 			hAlignPnl.orientation = "row";
 			var rbLeft = hAlignPnl.add("radiobutton", undefined, "Left");
@@ -39,6 +43,7 @@ function main() {
 			var rbRight = hAlignPnl.add("radiobutton", undefined, "Right");
 			rbRight.value = true;
 
+		// panel containing options to select vertical aligning of watermark
 		var vAlignPnl = dlg.add("panel", undefined, "Vertical alignment");
 			vAlignPnl.orientation = "row";
 			var rbTop = vAlignPnl.add("radiobutton", undefined, "Top");
@@ -46,6 +51,8 @@ function main() {
 			var rbBottom = vAlignPnl.add("radiobutton", undefined, "Bottom");
 			rbBottom.value = true;
 
+		// panel containing a slider and associated textbox to select how far away the watermark is to be placed from 
+		// the edge of the canvas
 		var offsetPnl = dlg.add("panel", undefined, "Offset watermark");
 			offsetPnl.orientation = "row";
 			var sOffset = offsetPnl.add("slider", undefined, 5, 0, 100);
@@ -58,6 +65,7 @@ function main() {
 				sOffset.value = Number(ibOffset.text);
 			}
 
+		// panel containing a slider and associated textbox to select the watermark's level of transparency
 		var opacityPnl = dlg.add("panel", undefined, "Opacity");
 			opacityPnl.orientation = "row";
 			var sOpacity = opacityPnl.add("slider", undefined, 10, 0, 100);
@@ -75,74 +83,61 @@ function main() {
 			var btnCancel = buttons.add("button", undefined, "Cancel");
 	dlg.show();
 
-	// open the watermark file
 	var wm = open(watermark);
 
 	// iterate through all files from the fileList array and add watermark to them
 	for (var i = 0; i < fileList.length; i++) {
 		var doc = open(fileList[i]);
 
+		// if the psd file in the folder is the selected watermark, ignore it
 		if (doc != wm) {
 			var wmLayer = doc.artLayers.add();
 			wmLayer.name = "watermark";
 
 			app.activeDocument = wm;
 
+			// iterate through all layers of the watermark document and remove hidden layers
 			for (var j = 1; j < wm.layers.length; j++) {
 				if (!wm.layers[j].visible)
 					wm.layers[j].remove();
 			}
 
+			// the true parameter ensures all layers in the document are copied and later pasted as a single layer
 			wm.layers[1].copy(true);
+
 			app.activeDocument = doc;
 			doc.paste();
-			wmLayer.move(activeDocument, ElementPlacement.PLACEATBEGINNING);
 
-			doc.artLayers.getByName("watermark").opacity = sOpacity.value;
+			wmLayer.move(activeDocument, ElementPlacement.PLACEATBEGINNING);
+			wmLayer.opacity = sOpacity.value;
 			
-			var x, y, minusX, minusY;
+			// setting of variables x and y to be used as parameters for the moveLayer function call
+			var x, y;
 			
 			if (rbLeft.value)
-				x = doc.width - wm.width;
+				x = doc.width - wm.width - (sOffset.value / 100) * doc.width;
 			if (rbCentre.value)
 				x = (doc.width / 2) - (wm.width / 2);
 			if (rbRight.value)
-				x = 0;
+				x = (sOffset.value / 100) * doc.width;
 			if (rbTop.value)
-				y = doc.height - wm.height;
+				y = doc.height - wm.height - (sOffset.value / 100) * doc.height;
 			if (rbMiddle.value)
 				y = (doc.height / 2) - (wm.height / 2);
 			if (rbBottom.value)
-				y = 0;
-
-			minusX = 0;
-			minusY = 0;
-
-			if (!rbCentre.value)
-				minusX = (sOffset.value / 100) * doc.width;
-			if (!rbMiddle.value)
-				minusY = (sOffset.value / 100) * doc.height;
-
-			if (rbLeft.value)
-				x = x - minusX;
-			else
-				x = x + minusX;
-
-			if (rbTop.value)
-				y = y - minusY;
-			else
-				y = y + minusY;
+				y = (sOffset.value / 100) * doc.height;
 
 			moveLayer(doc.artLayers.getByName("watermark"), x, y);
+
+			// saves the new image in the output folder as a psd
 			doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions());
 		}
 	}
 
-	// closes the watermark file without saving changes
 	wm.close(SaveOptions.DONOTSAVECHANGES);
 }
 
-// function to place a layer a specific location
+// this function moves the position of a layer
 function moveLayer(layerRef, x, y) {
 	var position = layerRef.bounds;
 	
