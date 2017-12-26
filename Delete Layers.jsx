@@ -101,6 +101,6 @@ function openAndSave(saveChanges) {
 			doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions())
 
 		doc.close(SaveOptions.DONOTSAVECHANGES);
-		alert("Process complete - check the output folder to see the changes made");
 	}
+	alert("Process complete - check the output folder to see the changes made");
 }

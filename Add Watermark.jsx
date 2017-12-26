@@ -129,12 +129,14 @@ function main() {
 
 			moveLayer(doc.artLayers.getByName("watermark"), x, y);
 
-			// saves the new image in the output folder as a psd
+			// saves the new image in the output folder as a psd then close it
 			doc.saveAs(new File(outputFolder + "/" + doc.name), new PhotoshopSaveOptions());
+			doc.close(SaveOptions.DONOTSAVECHANGES);
 		}
 	}
 
 	wm.close(SaveOptions.DONOTSAVECHANGES);
+	alert("Process complete - check the output folder to see the changes made");
 }
 
 // this function moves the position of a layer
