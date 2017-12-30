@@ -18,6 +18,20 @@ function main() {
 	if (inputFolder == null)
 		return;
 
+	// puts the filenames of all psd files into the fileList array
+	var fileList = inputFolder.getFiles("*.psd");
+
+	// if the input folder has no psd files, show alert and allow another folder to be set until it is valid
+	while (fileList.length == 0) {
+		alert("There are no psd files in this folder. Choose a different folder.");
+		
+		inputFolder = Folder.selectDialog("Select the folder containing your images");
+		if (inputFolder == null)
+			return;
+
+		fileList = inputFolder.getFiles("*.psd");
+	}
+
 	var outputFolder = Folder.selectDialog("Select or create a folder for your new images");
 	if (outputFolder == null)
 		return;
@@ -29,9 +43,6 @@ function main() {
 		if (outputFolder == null)
 			return;
 	}
-
-	// puts the filenames of all psd files into the fileList array
-	var fileList = inputFolder.getFiles("*.psd");
 
 	var dlg = new Window("dialog", "Options");
 
