@@ -11,8 +11,14 @@ main();
 
 function main() {
 	var watermark = File.openDialog("Select a file");
-	if (watermark == null)
-		return;
+	if (watermark == null) return;
+	reg = new RegExp('\.psd' + '$', 'i');
+	while (!reg.test(watermark.toString())) {
+		alert("Invalid file type. The watermark must be a psd file. Choose another file");
+		watermark = File.openDialog("Select a file");
+		if (watermark == null) return;
+	}
+
 
 	var inputFolder = Folder.selectDialog("Select the folder containing your images");
 	if (inputFolder == null)
