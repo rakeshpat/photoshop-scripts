@@ -98,7 +98,16 @@ function main() {
 		var buttons = dlg.add("group");
 			var btnOK = buttons.add("button", undefined, "OK");
 			var btnCancel = buttons.add("button", undefined, "Cancel");
+			var proceed = true;
+			btnCancel.onClick = function() {
+				proceed = false;
+				return;
+			}
 	dlg.show();
+
+	if (!proceed) {
+		return;
+	}
 
 	var wm = open(watermark);
 
