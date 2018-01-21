@@ -7,113 +7,138 @@
    of the canvas, and also how opaque the watermark should be.
 */
 
-main();
-
 function main() {
-	var watermark = File.openDialog("Select a file");
+	setWatermark();
+	checkWatermark();
+	setFolderAndGetFiles();
+	checkFileList();
+	setOutputFolder();
+	checkOutputFolder();
+	showOptions();
+	batchProcess();
+}
+
+function setWatermark() {
+	watermark = File.openDialog("Select a file");
 	if (watermark == null) return;
-	reg = new RegExp('\.psd' + '$', 'i');
-	while (!reg.test(watermark.toString())) {
+}
+
+function setInputFolder() {
+	inputFolder = Folder.selectDialog("Select the folder containing your images");
+	if (inputFolder == null) return;
+}
+
+function setOutputFolder() {
+	outputFolder = Folder.selectDialog("Select or create a folder for your new images");
+	if (outputFolder == null) return;
+}
+
+function setFolderAndGetFiles() {
+	setInputFolder();
+	getFileList();
+}
+
+// test to see if the watermark is not of the psd format required and displays alert if so
+function checkWatermark() {
+	var regex = new RegExp('\.psd' + '$', 'i');
+	while (!regex.test(watermark.toString())) {
 		alert("Invalid file type. The watermark must be a psd file. Choose another file");
-		watermark = File.openDialog("Select a file");
-		if (watermark == null) return;
+		setWatermark();
 	}
+}
 
-
-	var inputFolder = Folder.selectDialog("Select the folder containing your images");
-	if (inputFolder == null)
-		return;
-
-	// puts the filenames of all psd files into the fileList array
-	var fileList = inputFolder.getFiles("*.psd");
-
-	// if the input folder has no psd files, show alert and allow another folder to be set until it is valid
-	while (fileList.length == 0) {
+// test to see if the file list is empty and displays alert if so
+function checkFileList() {
+	while (getFileList().length == 0) {
 		alert("There are no psd files in this folder. Choose a different folder.");
-		
-		inputFolder = Folder.selectDialog("Select the folder containing your images");
-		if (inputFolder == null)
-			return;
-
-		fileList = inputFolder.getFiles("*.psd");
+		setFolderAndGetFiles();
 	}
+}
 
-	var outputFolder = Folder.selectDialog("Select or create a folder for your new images");
-	if (outputFolder == null)
-		return;
-
-	// check to see if input and output folders are matching, and if so, a different output folder can be selected
-	while (inputFolder.toString() == outputFolder.toString()) {
+// test to see if the output folder is the same as the input folder and displays alert if so
+function checkOutputFolder() {
+	while (getInputFolder() == getOutputFolder()) {
 		alert("The folder you select cannot be the same as the input folder. Choose a different folder.");
-		outputFolder = Folder.selectDialog("Select or create a folder for your new images");
-		if (outputFolder == null)
-			return;
+		setOutputFolder();
 	}
+}
 
+function getInputFolder() {
+	return inputFolder.toString();
+}
+
+function getOutputFolder() {
+	return outputFolder.toString();
+}
+
+function getFileList() {
+	return inputFolder.getFiles("*.psd");
+}
+
+function getWatermark() {
+	return watermark;
+}
+
+function showOptions() {
 	var dlg = new Window("dialog", "Options");
 
-		// panel containing options to select horizontal alignment of watermark
-		var hAlignPnl = dlg.add("panel", undefined, "Horizontal alignment");
-			hAlignPnl.orientation = "row";
-			var rbLeft = hAlignPnl.add("radiobutton", undefined, "Left");
-			var rbCentre = hAlignPnl.add("radiobutton", undefined, "Centre");
-			var rbRight = hAlignPnl.add("radiobutton", undefined, "Right");
-			rbRight.value = true;
+	// panel containing options to select horizontal alignment of watermark
+	var hAlignPnl = dlg.add("panel", undefined, "Horizontal alignment");
+		hAlignPnl.orientation = "row";
+		rbLeft = hAlignPnl.add("radiobutton", undefined, "Left");
+		rbCentre = hAlignPnl.add("radiobutton", undefined, "Centre");
+		rbRight = hAlignPnl.add("radiobutton", undefined, "Right");
+		rbRight.value = true;
 
-		// panel containing options to select vertical aligning of watermark
-		var vAlignPnl = dlg.add("panel", undefined, "Vertical alignment");
-			vAlignPnl.orientation = "row";
-			var rbTop = vAlignPnl.add("radiobutton", undefined, "Top");
-			var rbMiddle = vAlignPnl.add("radiobutton", undefined, "Middle");
-			var rbBottom = vAlignPnl.add("radiobutton", undefined, "Bottom");
-			rbBottom.value = true;
+	// panel containing options to select vertical aligning of watermark
+	var vAlignPnl = dlg.add("panel", undefined, "Vertical alignment");
+		vAlignPnl.orientation = "row";
+		rbTop = vAlignPnl.add("radiobutton", undefined, "Top");
+		rbMiddle = vAlignPnl.add("radiobutton", undefined, "Middle");
+		rbBottom = vAlignPnl.add("radiobutton", undefined, "Bottom");
+		rbBottom.value = true;
 
-		// panel containing a slider and associated textbox to select how far away the watermark is to be placed from 
-		// the edge of the canvas
-		var offsetPnl = dlg.add("panel", undefined, "Offset watermark");
-			offsetPnl.orientation = "row";
-			var sOffset = offsetPnl.add("slider", undefined, 5, 0, 100);
-			var ibOffset = offsetPnl.add("edittext", undefined, 10);
-			offsetPnl.add("statictext", undefined, "%");
-			sOffset.onChanging = function() {
-				ibOffset.text = sOffset.value;
-			}
-			ibOffset.onChanging = function() {
-				sOffset.value = Number(ibOffset.text);
-			}
+	// panel containing a slider and associated textbox to select how far away the watermark is to be placed from the 
+	// edge of the canvas
+	var offsetPnl = dlg.add("panel", undefined, "Offset watermark");
+		offsetPnl.orientation = "row";
+		sOffset = offsetPnl.add("slider", undefined, 5, 0, 100);
+		var ibOffset = offsetPnl.add("edittext", undefined, 5);
+		offsetPnl.add("statictext", undefined, "%");
+		sOffset.onChanging = function() {
+			ibOffset.text = sOffset.value;
+		}
+		ibOffset.onChanging = function() {
+			sOffset.value = Number(ibOffset.text);
+		}
 
-		// panel containing a slider and associated textbox to select the watermark's level of transparency
-		var opacityPnl = dlg.add("panel", undefined, "Opacity");
-			opacityPnl.orientation = "row";
-			var sOpacity = opacityPnl.add("slider", undefined, 10, 0, 100);
-			var ibOpacity = opacityPnl.add("edittext", undefined, 10);
-			opacityPnl.add("statictext", undefined, "%");
-			sOpacity.onChanging = function() {
-				ibOpacity.text = sOpacity.value;
-			}
-			ibOpacity.onChanging = function() {
-				sOpacity.value = Number(ibOpacity.text);
-			}
+	// panel containing a slider and associated textbox to select the watermark's level of transparency
+	var opacityPnl = dlg.add("panel", undefined, "Opacity");
+		opacityPnl.orientation = "row";
+		sOpacity = opacityPnl.add("slider", undefined, 10, 0, 100);
+		var ibOpacity = opacityPnl.add("edittext", undefined, 10);
+		opacityPnl.add("statictext", undefined, "%");
+		sOpacity.onChanging = function() {
+			ibOpacity.text = sOpacity.value;
+		}
+		ibOpacity.onChanging = function() {
+			sOpacity.value = Number(ibOpacity.text);
+		}
 
-		var buttons = dlg.add("group");
-			var btnOK = buttons.add("button", undefined, "OK");
-			var btnCancel = buttons.add("button", undefined, "Cancel");
-			var proceed = true;
-			btnCancel.onClick = function() {
-				proceed = false;
-				return;
-			}
+	// group containing ok and cancel buttons
+	var buttons = dlg.add("group");
+		var btnOK = buttons.add("button", undefined, "OK");
+		var btnCancel = buttons.add("button", undefined, "Cancel");
+
 	dlg.show();
+}
 
-	if (!proceed) {
-		return;
-	}
-
-	var wm = open(watermark);
+function batchProcess() {
+	var wm = open(getWatermark());
 
 	// iterate through all files from the fileList array and add watermark to them
-	for (var i = 0; i < fileList.length; i++) {
-		var doc = open(fileList[i]);
+	for (var i = 0; i < getFileList().length; i++) {
+		var doc = open(getFileList()[i]);
 
 		// if the psd file in the folder is the selected watermark, ignore it
 		if (doc != wm) {
@@ -136,7 +161,7 @@ function main() {
 
 			wmLayer.move(activeDocument, ElementPlacement.PLACEATBEGINNING);
 			wmLayer.opacity = sOpacity.value;
-			
+
 			// setting of variables x and y to be used as parameters for the moveLayer function call
 			var x, y;
 			
@@ -165,7 +190,6 @@ function main() {
 	alert("Process complete - check the output folder to see the changes made");
 }
 
-// this function moves the position of a layer
 function moveLayer(layerRef, x, y) {
 	var position = layerRef.bounds;
 	
@@ -173,3 +197,5 @@ function moveLayer(layerRef, x, y) {
 	position[1] = y - position[1];
 	layerRef.translate(-position[0], -position[1]);
 }
+
+main();
