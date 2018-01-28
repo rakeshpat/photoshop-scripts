@@ -8,34 +8,34 @@
 */
 
 function main() {
-	setWatermark();
-	checkWatermark();
-	setFolderAndGetFiles();
-	checkFileList();
-	setOutputFolder();
-	checkOutputFolder();
-	showOptions();
-	batchProcess();
+	try {
+		if (!setWatermark()) return;
+		checkWatermark();
+		if (!setInputFolder()) return;
+		getFileList(); //do these methods need to be called or can they be accessed. test
+		checkFileList();
+		if (!setOutputFolder()) return;
+		checkOutputFolder();
+		showOptions();
+		batchProcess();
+	} catch (err) {
+		return;
+	}
 }
 
 function setWatermark() {
 	watermark = File.openDialog("Select a file");
-	if (watermark == null) return;
+	return (watermark != null);
 }
 
 function setInputFolder() {
 	inputFolder = Folder.selectDialog("Select the folder containing your images");
-	if (inputFolder == null) return;
+	return (inputFolder != null);
 }
 
 function setOutputFolder() {
 	outputFolder = Folder.selectDialog("Select or create a folder for your new images");
-	if (outputFolder == null) return;
-}
-
-function setFolderAndGetFiles() {
-	setInputFolder();
-	getFileList();
+	return (outputFolder != null);
 }
 
 // test to see if the watermark is not of the psd format required and displays alert if so
@@ -51,7 +51,8 @@ function checkWatermark() {
 function checkFileList() {
 	while (getFileList().length == 0) {
 		alert("There are no psd files in this folder. Choose a different folder.");
-		setFolderAndGetFiles();
+		setInputFolder();
+		getFileList();
 	}
 }
 
