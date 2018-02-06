@@ -17,7 +17,7 @@ function main() {
 		if (!setOutputFolder()) return;
 		checkOutputFolder();
 		showOptions();
-		batchProcess();
+		if (proceed) batchProcess();
 	} catch (err) {
 		return;
 	}
@@ -130,6 +130,16 @@ function showOptions() {
 	var buttons = dlg.add("group");
 		var btnOK = buttons.add("button", undefined, "OK");
 		var btnCancel = buttons.add("button", undefined, "Cancel");
+
+		btnOK.onClick = function() {
+			proceed = true;
+			dlg.show() == 2;
+		}
+
+		btnCancel.onClick = function() {
+			proceed = false;
+			dlg.show() == 2;
+		}
 
 	dlg.show();
 }
